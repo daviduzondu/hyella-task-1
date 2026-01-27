@@ -86,9 +86,9 @@ function httpJson($url, $method = "GET", $headers = [], $body = null)
 // RANDOM USER
 // =====================
 
-function getRandomUser()
+function getRandomUser($count)
 {
- echo "Generating data...";
+ echo "Generating data ($count)...";
  $data = httpJson("https://randomuser.me/api/?nat=us&exc=login");
 
  if (!$data || !isset($data["results"][0])) {
@@ -165,8 +165,8 @@ try {
 
  $token = getAccessToken($SERVICE_ACCOUNT);
 
- for ($i = 0; $i <= 6; $i++) {
-  $user = getRandomUser();
+ for ($i = 0; $i <= 5; $i++) {
+  $user = getRandomUser($i + 1);
   insertUser($user, $token);
  }
 
