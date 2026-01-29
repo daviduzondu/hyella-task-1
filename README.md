@@ -58,7 +58,7 @@ These values are what appear inside `service-account.json` (or directly in `inde
 
 ## Q & A
 
-### 1. Why can’t I edit the document directly?
+### 1. Why can't I edit the document directly?
 
 If you are accessing the spreadsheet as a guest, it is likely because the share settings for guests are set to view-only.
 
