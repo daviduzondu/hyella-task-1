@@ -25,6 +25,10 @@ Normally, Google credentials are stored inside a separate file called
 
 However, **for demo purposes**, the credentials have been placed **directly inside `index.php`** so that the entire solution lives in a single file.
 
+> [!NOTE]
+> The credentials found in `index.php` have been disabled and will not work.  
+> For actual testing, use the `with-external-sa.php` file and make sure you have a valid `service-account.json` file in the same directory as the PHP file.
+
 This makes testing easier, but **this is NOT recommended for production**.
 
 In a real project:
@@ -66,7 +70,7 @@ If you are accessing the spreadsheet as a guest, it is likely because the share 
 
 Google treats guest users differently from signed-in Google accounts. Even if the sheet appears editable to the owner, guests may only have read access.
 
-### Will the code work if the document is editable?
+#### Will the code work if the document is editable?
 
 Yes.
 
@@ -90,6 +94,41 @@ As long as:
 - The service account has **Editor** permission  
 
 Public visibility is not required.
+
+### 4. What are the limitations?
+
+Here's what the *real web-docs say* about limits for the Google Sheets API so you can answer “What are the limitations?” in your README with accuracy and context:
+
+---
+
+### 4. What are the limitations?
+
+When using the Google Sheets API (like in this project), there *are* limits you need to be aware of. These aren't about your spreadsheet being private or public, they're about how often and how much you talk to Google's servers.
+
+#### **API quotas**
+
+* Sheets API **has per-minute quotas** on read and write requests.
+  • Up to about **300 reads per minute per project**
+  • Up to about **300 writes per minute per project**
+  • And around **60 requests per user per minute per project** too.
+
+* If you exceed these limits you'll get a `429 Too Many Requests` error until quota resets.
+
+* **No hard daily cap on reads/writes**
+There's no fixed daily limit on Sheets read/write operations as long as you stay within per-minute quotas.
+
+- **Backoff and retries**
+Google recommends implementing a retry strategy (like exponential backoff) if quota errors occur.
+
+- **Batching vs individual requests**
+Making many individual requests quickly (e.g., one per row) eats quota faster. Batching multiple row writes in one request is more efficient and helps avoid hitting limits. 
+
+- **Timeouts**
+Very large API requests or heavy operations that take too long (over about 180 seconds) can time out.
+
+- **Not meant for extremely high traffic**
+This API is great for occasional or moderate use. For very large scale automation you may need a different backend or batching strategy. 
+
 
 ## Project Structure (Recommended)
 
