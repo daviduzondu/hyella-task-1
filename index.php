@@ -24,6 +24,26 @@ function getAccessToken()
   throw new Exception("Failed to locate service-account.json file\n");
  }
 
+
+ if (!is_array($creds)) {
+    throw new Exception("Failed to load or parse service-account.json");
+}
+
+$requiredKeys = [
+    "client_email",
+    "private_key",
+    "token_uri",
+    "project_id",
+    "private_key_id",
+    "private_key"
+];
+
+foreach ($requiredKeys as $key) {
+    if (empty($creds[$key])) {
+        throw new Exception("Missing required key in service-account.json: $key");
+    }
+}
+
  $header = base64url_encode(json_encode([
   "alg" => "RS256",
   "typ" => "JWT"
