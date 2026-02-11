@@ -17,8 +17,12 @@ function base64url_encode($data)
 }
 
 // Create OAuth access token using JWT
-function getAccessToken($creds)
+function getAccessToken()
 {
+ $creds = json_decode(file_get_contents(__DIR__ . "/service-account.json"), true);
+ if (!$creds) {
+  throw new Exception("Failed to locate service-account.json file\n");
+ }
 
  $header = base64url_encode(json_encode([
   "alg" => "RS256",
@@ -61,6 +65,12 @@ function getAccessToken($creds)
 
  $data = json_decode($response, true);
 
+ if (!isset($data["access_token"])) {
+  throw new Exception(
+   "access_token missing. Response was: " . $response
+  );
+ }
+
  return $data["access_token"];
 }
 
@@ -86,9 +96,9 @@ function httpJson($url, $method = "GET", $headers = [], $body = null)
 // RANDOM USER
 // =====================
 
-function getRandomUser()
+function getRandomUser($count)
 {
- echo "Generating data...";
+ echo "Generating data ($count)...";
  $data = httpJson("https://randomuser.me/api/?nat=us&exc=login");
 
  if (!$data || !isset($data["results"][0])) {
@@ -141,32 +151,15 @@ function insertUser($user, $token)
 }
 
 // =====================
-// EMBEDDED SERVICE ACCOUNT
-// =====================
-
-$SERVICE_ACCOUNT = [
- "type" => "service_account",
- "project_id" => "hyella-task-1",
- "private_key_id" => "62ec9c3e8008af4cc431b1877ea930fb75831613",
- "private_key" => "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC6ybkjEMB4EV9u\nAthTqUaYifQyPDEPau63Wc0VbX/WPYzmHFQIdU/fal1uEhdz5WaIBOX9cDoD8Jxh\nKMvmk50INBtJ2mKyTO4lZ++p1MRl9hYKXBaY/3DECLEp+5k9wAQTczsgb0bn5QoM\njVm2hqheE9Lbw1HqIs4NET74FNAfHHp4on/GStAquRV68bNRxLh8opV3tsv8o8DY\nk5lUBBIvjpx+sGxRe7PGuol694h5W4Nz5IuEI1jiQsRCCDKAFTBqavkbRtR4eB+C\nASwezX7rZfuJ2zET1WFkDUKIS58cH2kmZPqY8QL4wE30HSBlzD06OiT1GWABKhQO\nvfW+UbiFAgMBAAECggEAKL7IO/Xzhj2D66ODPPy4AZ5WPn8S1KIm4KgeLIZuVHWo\nvql/SzkL61hweQpJQ2bPLuyint5USXe7JRaZI/sfTiLPsRSKYwqVCGPby9g132gG\n9suPwmA2YQzkWJwhmW7BdNy2ESU0+nDj+Ej9QOuu3pbEcFvzCnf9KqyQZ91iaOaW\nAWEohv36+GKSFUWGIhOTevNWw2PZZ5M9eNB/62B0SQbcsuZhVCb+Rb7MnwlW67KJ\nsvc/YXXxu8uqcv4lJ9cOXzyn4WN3HOzy3Dtq9Qd6j/2z3D3hiQA5inmGlaRtBYm2\nS8rF21EeziBq30NUoXoQiS6GdDKTZseutbyluherAQKBgQDgcZrguRt5eMaY+OoO\ntrtpOosT1GNgAxEuAyjy+URTee6lY6jaXiD5kcwDOAE2LQCjxPfxwD+rFerpKgj+\nHY43o6OGXAgueUlLwP0/HFSzfgABMvcqmmhY5L85Lkve1lMyBdlgG6NCHu7xMUvQ\n1e0XOR9Yr9lRcBpPkoeY7nqcjQKBgQDVDMZnwG0MFmoPx1+KrusgS9q8HAtrxTNc\nUs174YwJCIOkINkURNyeL9Oxa68EIhFt+2gLyPOF8RBCQz/0PevbS898hgZ7lfWr\n6ExtpXRcaas+yAhPICU3Sz9nxdFJw5mTtzt+TVS8Iwk28mk8kOXYcbisazHhs/YG\nt1E7mU5Z2QKBgQCBW3i0RHu9SwrLZ8sep9rkD0XRK/wKfjoMlu2m/FuQ8RnGYOYU\n1WOT85/tyv2Hx/Ayc3ej8fXAGWXG9N8x9r7c+odpDOn6PxUrgBN1qFJ5EQnXpxQl\njdDOSyibQD+iM0zH6+8ZIVS66zEz+gGEX4fCdr3GU7Og6EeBzSYx0mEAkQKBgQCo\nVNiqfyJpy4fvgaKei8ghE2329N2dQAltp8rNV47yUDTayE1cM3Bw1+8WHrQAuv40\nfNBfh13J9YbYJBRy4T3qXgLJK4gRu5GJSxigBXtjzOXNy/SsuARPpPerAWR0OMSu\nLrcl+um5YKFWNcAqZ34DPw8fw+58m1kHQ24+fcmnOQKBgQCXwDCh7p0fUbO3tA07\ndyEUUeXlg5aGaV3O9lm2Cfaqf1gVknyTKAq/TjUshKX+KLw2x5pV7dHzxVs8+x/6\nFvOt7QLMsQ/8EgtKLqmomIko12mSIOl224po+TScseYNnNIzem422MORM6xmaIMD\nrHX3oPocYLG2hUp31nUGOcDE+A==\n-----END PRIVATE KEY-----\n",
- "client_email" => "hyella-task-1@hyella-task-1.iam.gserviceaccount.com",
- "client_id" => "107054972723950582654",
- "auth_uri" => "https://accounts.google.com/o/oauth2/auth",
- "token_uri" => "https://oauth2.googleapis.com/token",
- "auth_provider_x509_cert_url" => "https://www.googleapis.com/oauth2/v1/certs",
- "client_x509_cert_url" => "https://www.googleapis.com/robot/v1/metadata/x509/hyella-task-1%40hyella-task-1.iam.gserviceaccount.com"
-];
-
-// =====================
 // MAIN
 // =====================
 
 try {
 
- $token = getAccessToken($SERVICE_ACCOUNT);
+ $token = getAccessToken();
 
  for ($i = 0; $i <= 6; $i++) {
-  $user = getRandomUser();
+  $user = getRandomUser($i);
   insertUser($user, $token);
  }
 
